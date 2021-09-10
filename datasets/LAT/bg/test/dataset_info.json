@@ -1,0 +1,95 @@
+{
+  "builder_name": "csv",
+  "citation": "",
+  "config_name": "default",
+  "dataset_size": 2008168,
+  "description": "",
+  "download_checksums": {
+    "dev.csv": {
+      "checksum": "45b4690d85285b529bbd9ce1ac9bc368258788a37e5ef9ce335757a75973f3c9",
+      "num_bytes": 204258
+    },
+    "test.csv": {
+      "checksum": "55238a0fb141e6caba164763817dff169949dd63a2f514804387dda70de44a73",
+      "num_bytes": 200195
+    },
+    "train.csv": {
+      "checksum": "b4587d10a602b0be4ca9729e1415df5b34fd776349bcbdfa1d06c8870825e44a",
+      "num_bytes": 1583747
+    }
+  },
+  "download_size": 1988200,
+  "features": {
+    "tags": {
+      "_type": "Sequence",
+      "feature": {
+        "_type": "ClassLabel",
+        "id": null,
+        "names": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "names_file": null,
+        "num_classes": 15
+      },
+      "id": null,
+      "length": -1
+    },
+    "tokens": {
+      "_type": "Sequence",
+      "feature": {
+        "_type": "Value",
+        "dtype": "string",
+        "id": null
+      },
+      "id": null,
+      "length": -1
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "post_processed": null,
+  "post_processing_size": null,
+  "size_in_bytes": 3996368,
+  "splits": {
+    "test": {
+      "dataset_name": "csv",
+      "name": "test",
+      "num_bytes": 202156,
+      "num_examples": 1116
+    },
+    "train": {
+      "dataset_name": "csv",
+      "name": "train",
+      "num_bytes": 1599783,
+      "num_examples": 8907
+    },
+    "validation": {
+      "dataset_name": "csv",
+      "name": "validation",
+      "num_bytes": 206229,
+      "num_examples": 1115
+    }
+  },
+  "supervised_keys": null,
+  "version": {
+    "description": null,
+    "major": 0,
+    "minor": 0,
+    "patch": 0,
+    "version_str": "0.0.0"
+  }
+}
