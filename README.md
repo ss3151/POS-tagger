@@ -4,6 +4,16 @@ Cross-lingual transfer for POS tagging
 Using cross-lingual transfer approach, we implement a Part-of-speech tagger 
 for a low resource language.
 
+Project Organization
+------------
+    ├── datasets/     <- Contains Huggingface datasets for the used languages.
+    ├── predictions/  <- Contains stored predictions on the target-language test set.     
+    ├── scripts/      <- Main project code. 
+    ├── utils/        <- Utility files.
+    ├── Pipfile       <- Pipfile for pipenv package manager.
+    └──README.md      <- A README for using this project.
+--------
+
 ### Environment setup
 
 Use  `pipenv` ([docs](https://github.com/pypa/pipenv)) to manage the
