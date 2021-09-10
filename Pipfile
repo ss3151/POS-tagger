@@ -1,0 +1,24 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+jupyterlab = "*"
+ipywidgets = "*"
+scikit-learn = "*"
+matplotlib = "*"
+seaborn = "*"
+python-dotenv = "*"
+termcolor = "*"
+
+
+[packages]
+transformers = "*"
+datasets = "*"
+pyconll = "*"
+seqeval = "*"
+google-colab ="*"
+
+[requires]
+python_version = "3.8"
