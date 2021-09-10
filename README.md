@@ -4,8 +4,6 @@ Cross-lingual transfer for POS tagging
 Using cross-lingual transfer approach, we implement a Part-of-speech tagger 
 for a low resource language.
 
-## Development guide
-
 ### Environment setup
 
 Use  `pipenv` ([docs](https://github.com/pypa/pipenv)) to manage the
@@ -24,7 +22,7 @@ pipenv install --dev
 [comment]: <> (| `TOKENIZER_PATH`      | `data/external/nltk_data/tokenizers/punkt/slovene.pickle` | Optional. Path for loading a pickle for the NLTK `punkt` sentence tokenizer. |)
 
 
-From the project root.Setup the virtual environment.
+From the project root. Set up the virtual environment.
 ```
 pipenv shell
 ```
