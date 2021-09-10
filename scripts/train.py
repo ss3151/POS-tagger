@@ -5,27 +5,25 @@ import argparse
 from typing import Optional
 
 import numpy as np
-import datasets
-
 from datasets import load_from_disk, concatenate_datasets, load_metric
 from datasets import DatasetDict, Dataset
+from transformers import Trainer
 from transformers import TrainingArguments, DataCollatorForTokenClassification
+from transformers import AutoModelForTokenClassification, AutoTokenizer
 from transformers.trainer_utils import get_last_checkpoint
-from transformers import AutoModelForTokenClassification, AutoTokenizer, Trainer
+from utils.config import TAG2IDX
 
 N_LABEL = 15
 metric = load_metric("seqeval")
 
 
 def main(args):
-        
-    # Hyper-parameters
+
     training_dir = args.training_dir
-    second_dir = args.second_training_dir if args.second_training_dir else None
+    second_dir = args.second_training_dir
     test_dir = args.test_dir
     output_dir = args.output_dir
     output_data_dir = args.output_data_dir
-    model_dir = args.model_dir
 
     model_name = args.model_name
     epochs = args.epochs
@@ -44,13 +42,9 @@ def main(args):
         handlers=[logging.StreamHandler(sys.stdout)],
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-    tag2id = {'ADJ': 0, 'ADP': 1, 'ADV': 2, 'AUX': 3, 'CCONJ': 4, 'DET': 5,
-              'INTJ': 6, 'NOUN': 7, 'NUM': 8, 'PART': 9, 'PRON': 10,
-              'PROPN': 11, 'PUNCT': 12, 'SCONJ': 13, 'VERB': 14}
 
-    idx2tag = {v: k for k, v in tag2id.items()}
+    idx2tag = {v: k for k, v in TAG2IDX.items()}
 
-    # download tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def join_datasets(dataset1: DatasetDict,
@@ -60,9 +54,9 @@ def main(args):
         Concatenates all data splits. If two datasets are provided
         it creates joint-dataset.
 
-        :param target:
         :param dataset1: Dataset of the source language for training
         :param dataset2: Dataset of the second source language for training
+        :param target: Target-language subset dataset
         :return: training Dataset
         """
         train = concatenate_datasets([dataset1["train"],
@@ -77,20 +71,18 @@ def main(args):
             train = concatenate_datasets(train, target)
         return train
 
-    # Load dataset
-    test_dataset = datasets.load_from_disk(test_dir)
-    train_dataset = datasets.load_from_disk(training_dir)
+    test_dataset = load_from_disk(test_dir)
+    train_dataset = load_from_disk(training_dir)
+
     train_dataset2 = None
     subset = None
     if second_dir:
-        train_dataset2 = datasets.load_from_disk(second_dir)
+        train_dataset2 = load_from_disk(second_dir)
     if target_size > .0:
         subset = test_dataset['train'].train_test_split(train_size=target_size,
                                                         shuffle=True,
                                                         seed=1)
     train_dataset = join_datasets(train_dataset, train_dataset2, subset)
-
-    print(train_dataset.num_rows)
 
     logger.info(f" loaded train_dataset length is: {len(train_dataset)}")
 
@@ -133,16 +125,15 @@ def main(args):
         _predictions, _labels = p
         _predictions = np.argmax(_predictions, axis=2)
 
-        # Remove ignored index (special tokens)
         _true_predictions = [
-            [idx2tag[p] for (p, l) in zip(prediction, label) if l != -100]
+            [idx2tag[p] for (p, lab) in zip(prediction, label) if lab != -100]
             for prediction, label in zip(_predictions, _labels)
         ]
         _true_labels = [
-            [idx2tag[l] for (p, l) in zip(prediction, label) if l != -100]
+            [idx2tag[lab] for (p, lab)
+             in zip(prediction, label) if lab != -100]
             for prediction, label in zip(_predictions, _labels)
         ]
-        # cm = confusion_matrix(true_labels, true_predictions)
         _results = metric.compute(predictions=_true_predictions,
                                   references=_true_labels)
         return {
@@ -152,13 +143,11 @@ def main(args):
             "accuracy": _results["overall_accuracy"],
         }
 
-    # download model from model hub
     model = AutoModelForTokenClassification.from_pretrained(model_name,
                                                             num_labels=N_LABEL)
 
     data_collator = DataCollatorForTokenClassification(tokenizer)
 
-    # define training args
     training_args = TrainingArguments(
         output_dir=output_dir,
         learning_rate=lr_rate,
@@ -169,7 +158,6 @@ def main(args):
         logging_dir=f"{output_data_dir}/logs",
     )
 
-    # create Trainer instance
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -180,13 +168,12 @@ def main(args):
         eval_dataset=test_tokenized_set['validation'],
     )
 
-    # train model
     if get_last_checkpoint(output_dir) is not None:
         logger.info("***** continue training *****")
         trainer.train(resume_from_checkpoint=output_dir)
     else:
         trainer.train()
-    # evaluate model
+
     eval_result = trainer.evaluate(eval_dataset=test_dataset['validation'])
 
     with open(os.path.join(output_data_dir, "eval_results.txt"), "w") as w:
@@ -194,17 +181,11 @@ def main(args):
         for key, value in sorted(eval_result.items()):
             w.write(f"{key} = {value}\n")
 
-    #TODO: implement few-shot
-    # subset = dataset_mk['train'].train_test_split(train_size=0.3,
-    #                                               shuffle=True,
-    #                                               seed=1)
-
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    # hyperparameters as command-line arguments to the script.
     parser.add_argument("--model_name", required=True, type=str)
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--train-batch-size", type=int, default=4)
@@ -213,7 +194,6 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir",
                         type=str, required=True)
 
-    # Data and output directories
     parser.add_argument("--training_dir", type=str)
     parser.add_argument("--few_shot_percentage", type=float, default=.0)
     parser.add_argument("--second_training_dir", type=str, default=None)
