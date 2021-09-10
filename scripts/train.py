@@ -13,7 +13,7 @@ from transformers import AutoModelForTokenClassification, AutoTokenizer
 from transformers.trainer_utils import get_last_checkpoint
 from utils.config import TAG2IDX
 
-N_LABEL = 15
+
 metric = load_metric("seqeval")
 
 
@@ -143,8 +143,8 @@ def main(args):
             "accuracy": _results["overall_accuracy"],
         }
 
-    model = AutoModelForTokenClassification.from_pretrained(model_name,
-                                                            num_labels=N_LABEL)
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_name, num_labels=len(TAG2IDX))
 
     data_collator = DataCollatorForTokenClassification(tokenizer)
 
