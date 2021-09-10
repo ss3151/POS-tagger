@@ -28,7 +28,7 @@ From the project root.Setup the virtual environment.
 ```
 pipenv shell
 ```
-To run the training script (example:
+To run the training script (example):
 ```
 python train.py --model_name <MODEL_NAME_HUGGINGFACE>
 --training_dir <PATH_TO_HUGGINGFACE_DATASET_TRAIN>
